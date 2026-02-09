@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -19,9 +20,11 @@ import {
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
 import { CategoryEntity } from './entities/category.entity';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiBearerAuth('token')
 @ApiTags('Categories')
+@UseGuards(AuthGuard('jwt'))
 @Controller('categories')
 export class CategoriesController {
   constructor(private categoryService: CategoriesService) {}

@@ -31,9 +31,7 @@ const handlePrismaError = (error: any): HttpException | Error => {
           fieldName.includes('categoryId') ||
           error.message.includes('categoryId')
         ) {
-          return new BadRequestException(
-            'Author / user Id invalid or not found',
-          );
+          return new BadRequestException('Category Id invalid or not found');
         }
 
         return new BadRequestException('Data relation invalid');
