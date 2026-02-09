@@ -1,0 +1,18 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^prisma/client/(.*)\\.js$": "<rootDir>/../prisma/client/$1",
+    "^prisma/client/(.*)$": "<rootDir>/../prisma/client/$1",
+    "^prisma/client$": "<rootDir>/../prisma/client",
+    "^(\\.\\.?/.*)\\.js$": "$1"
+  },
+  "modulePaths": [
+    "<rootDir>/../"
+  ]
+}
