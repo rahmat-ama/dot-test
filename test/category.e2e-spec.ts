@@ -7,9 +7,16 @@ import request from 'supertest';
 describe('Categories Controller (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let jwtToken: string;
   let createdCategoryId: number;
 
   // dummy data for test
+  const userDto = {
+    email: 'categorytest@gmail.com',
+    password: 'testpassword',
+    name: 'Category Test User',
+  };
+
   const createCategoryDto = {
     name: 'Technology',
     description: 'All about technology and innovation',
@@ -40,6 +47,14 @@ describe('Categories Controller (e2e)', () => {
     prisma = app.get(PrismaService);
     await prisma.post.deleteMany(); // relation delete
     await prisma.category.deleteMany();
+    await prisma.user.deleteMany();
+
+    // create user and get jwt token
+    const signupResponse = await request(app.getHttpServer())
+      .post('/auth/signup')
+      .send(userDto);
+
+    jwtToken = signupResponse.body.token as string;
   });
 
   afterAll(async () => {
@@ -47,9 +62,17 @@ describe('Categories Controller (e2e)', () => {
   });
 
   describe('POST api/categories', () => {
+    it('should throw 401 if no JWT token provided', () => {
+      return request(app.getHttpServer())
+        .post('/categories')
+        .send(createCategoryDto)
+        .expect(401);
+    });
+
     it('should create a category successfully', () => {
       return request(app.getHttpServer())
         .post('/categories')
+        .set('Authorization', `Bearer ${jwtToken}`)
         .send(createCategoryDto)
         .expect(201)
         .expect((res: request.Response) => {
@@ -66,6 +89,7 @@ describe('Categories Controller (e2e)', () => {
     it('should throw 400 if validation fails (empty name)', () => {
       return request(app.getHttpServer())
         .post('/categories')
+        .set('Authorization', `Bearer ${jwtToken}`)
         .send({ ...createCategoryDto, name: '' })
         .expect(400);
     });
@@ -73,6 +97,7 @@ describe('Categories Controller (e2e)', () => {
     it('should throw 400 if validation fails (empty description)', () => {
       return request(app.getHttpServer())
         .post('/categories')
+        .set('Authorization', `Bearer ${jwtToken}`)
         .send({ ...createCategoryDto, description: '' })
         .expect(400);
     });
@@ -80,19 +105,24 @@ describe('Categories Controller (e2e)', () => {
     it('should throw 400 if validation fails (missing fields)', () => {
       return request(app.getHttpServer())
         .post('/categories')
+        .set('Authorization', `Bearer ${jwtToken}`)
         .send({})
         .expect(400);
     });
   });
 
   describe('GET api/categories', () => {
+    it('should throw 401 if no JWT token provided', () => {
+      return request(app.getHttpServer()).get('/categories').expect(401);
+    });
+
     it('should return all categories', () => {
       return request(app.getHttpServer())
         .get('/categories')
+        .set('Authorization', `Bearer ${jwtToken}`)
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body.length).toBeGreaterThan(0);
           expect(res.body[0]).toHaveProperty('id');
           expect(res.body[0]).toHaveProperty('name');
           expect(res.body[0]).toHaveProperty('description');
@@ -101,9 +131,16 @@ describe('Categories Controller (e2e)', () => {
   });
 
   describe('GET api/categories/:id', () => {
+    it('should throw 401 if no JWT token provided', () => {
+      return request(app.getHttpServer())
+        .get(`/categories/${createdCategoryId}`)
+        .expect(401);
+    });
+
     it('should return a category by id', () => {
       return request(app.getHttpServer())
         .get(`/categories/${createdCategoryId}`)
+        .set('Authorization', `Bearer ${jwtToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body.id).toBe(createdCategoryId);
@@ -113,20 +150,32 @@ describe('Categories Controller (e2e)', () => {
     });
 
     it('should throw 404 if category not found', () => {
-      return request(app.getHttpServer()).get('/categories/999999').expect(404);
+      return request(app.getHttpServer())
+        .get('/categories/999999')
+        .set('Authorization', `Bearer ${jwtToken}`)
+        .expect(404);
     });
 
     it('should throw 400 if id is not a number', () => {
       return request(app.getHttpServer())
         .get('/categories/invalid-id')
+        .set('Authorization', `Bearer ${jwtToken}`)
         .expect(400);
     });
   });
 
   describe('PUT api/categories/:id', () => {
+    it('should throw 401 if no JWT token provided', () => {
+      return request(app.getHttpServer())
+        .put(`/categories/${createdCategoryId}`)
+        .send(updateCategoryDto)
+        .expect(401);
+    });
+
     it('should update a category successfully', () => {
       return request(app.getHttpServer())
         .put(`/categories/${createdCategoryId}`)
+        .set('Authorization', `Bearer ${jwtToken}`)
         .send(updateCategoryDto)
         .expect(200)
         .expect((res) => {
@@ -139,6 +188,7 @@ describe('Categories Controller (e2e)', () => {
     it('should update category with partial data (only name)', () => {
       return request(app.getHttpServer())
         .put(`/categories/${createdCategoryId}`)
+        .set('Authorization', `Bearer ${jwtToken}`)
         .send({ name: 'Partial Update' })
         .expect(200)
         .expect((res) => {
@@ -149,6 +199,7 @@ describe('Categories Controller (e2e)', () => {
     it('should throw 404 if category not found', () => {
       return request(app.getHttpServer())
         .put('/categories/999999')
+        .set('Authorization', `Bearer ${jwtToken}`)
         .send(updateCategoryDto)
         .expect(404);
     });
@@ -156,27 +207,37 @@ describe('Categories Controller (e2e)', () => {
     it('should throw 400 if id is not a number', () => {
       return request(app.getHttpServer())
         .put('/categories/invalid-id')
+        .set('Authorization', `Bearer ${jwtToken}`)
         .send(updateCategoryDto)
         .expect(400);
     });
   });
 
   describe('DELETE api/categories/:id', () => {
+    it('should throw 401 if no JWT token provided', () => {
+      return request(app.getHttpServer())
+        .delete(`/categories/${createdCategoryId}`)
+        .expect(401);
+    });
+
     it('should throw 404 if category not found', () => {
       return request(app.getHttpServer())
         .delete('/categories/999999')
+        .set('Authorization', `Bearer ${jwtToken}`)
         .expect(404);
     });
 
     it('should throw 400 if id is not a number', () => {
       return request(app.getHttpServer())
         .delete('/categories/invalid-id')
+        .set('Authorization', `Bearer ${jwtToken}`)
         .expect(400);
     });
 
     it('should delete a category successfully', () => {
       return request(app.getHttpServer())
         .delete(`/categories/${createdCategoryId}`)
+        .set('Authorization', `Bearer ${jwtToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty('message');
@@ -187,6 +248,7 @@ describe('Categories Controller (e2e)', () => {
     it('should verify category is deleted', () => {
       return request(app.getHttpServer())
         .get(`/categories/${createdCategoryId}`)
+        .set('Authorization', `Bearer ${jwtToken}`)
         .expect(404);
     });
   });

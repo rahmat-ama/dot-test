@@ -76,6 +76,7 @@ describe('Posts Controller (e2e)', () => {
     // create category
     const categoryResponse = await request(app.getHttpServer())
       .post('/categories')
+      .set('Authorization', `Bearer ${jwtToken}`)
       .send(categoryDto);
 
     categoryId = categoryResponse.body.id as number;
