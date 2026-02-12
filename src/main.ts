@@ -1,8 +1,8 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
+import { TransformResopnseInterceptor } from './common/interceptors/transform-response.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -11,6 +11,12 @@ async function bootstrap() {
 
   // for Dto use
   app.useGlobalPipes(new ValidationPipe());
+
+  // make reflector instance
+  const reflector = app.get(Reflector);
+
+  // use reflector on global interceptor
+  app.useGlobalInterceptors(new TransformResopnseInterceptor(reflector));
 
   // config documentation / Swagger
   const config = new DocumentBuilder()
