@@ -21,6 +21,7 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
 import { CategoryEntity } from './entities/category.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 
 @ApiBearerAuth('token')
 @ApiTags('Categories')
@@ -36,6 +37,7 @@ export class CategoriesController {
     type: [CategoryEntity],
   })
   @Get()
+  @ResponseMessage('Categories data loaded successfully')
   async getCategories(): Promise<CategoryEntity[]> {
     const categories = await this.categoryService.getCategories();
 
@@ -50,6 +52,7 @@ export class CategoriesController {
   })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @Post()
+  @ResponseMessage('Category created successfully')
   async createCategory(
     @Body() createCategoryData: CreateCategoryDto,
   ): Promise<CategoryEntity> {
@@ -64,6 +67,7 @@ export class CategoriesController {
   @ApiOkResponse({ description: 'Category found', type: CategoryEntity })
   @ApiResponse({ status: 404, description: 'Category not found' })
   @Get(':id')
+  @ResponseMessage('Category loaded successfully')
   async getCategoryById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CategoryEntity> {
@@ -80,6 +84,7 @@ export class CategoriesController {
   })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @Put(':id')
+  @ResponseMessage('Category updated successfully')
   async updateCategory(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryData: UpdateCategoryDto,
@@ -105,7 +110,12 @@ export class CategoriesController {
   })
   @ApiResponse({ status: 404, description: 'Category not found' })
   @Delete(':id')
-  async deleteCategory(@Param('id', ParseIntPipe) id: number) {
-    return await this.categoryService.deleteCategory(id);
+  @ResponseMessage('Category deleted successfully')
+  async deleteCategory(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CategoryEntity> {
+    const deletedCategory = await this.categoryService.deleteCategory(id);
+
+    return deletedCategory;
   }
 }

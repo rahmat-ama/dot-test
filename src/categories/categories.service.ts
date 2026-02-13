@@ -40,12 +40,9 @@ export class CategoriesService {
     return category;
   }
 
-  async deleteCategory(id: number): Promise<object> {
-    await this.categoryRepo.delete(id);
+  async deleteCategory(id: number): Promise<CategoryEntity> {
+    const deletedCategory = await this.categoryRepo.delete(id);
 
-    return {
-      success: true,
-      message: 'Category deleted successfully',
-    };
+    return deletedCategory;
   }
 }
