@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Put,
   Req,
   UnauthorizedException,
@@ -20,6 +22,7 @@ import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { type ReqWithUser } from './types/request-with-user.type';
+import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 
 @ApiBearerAuth('token')
 @ApiTags('User')
@@ -34,6 +37,8 @@ export class UsersController {
   @ApiOkResponse({ description: 'User found', type: UserEntity })
   @ApiResponse({ status: 404, description: 'User not found' })
   @Get('profile')
+  @ResponseMessage('Current User data fetched successfully')
+  @HttpCode(HttpStatus.OK)
   async getUserProfile(@Req() req: ReqWithUser): Promise<UserEntity | null> {
     if (!req.user) {
       throw new UnauthorizedException('User not authenticated');
@@ -49,6 +54,7 @@ export class UsersController {
   @ApiOkResponse({ description: 'User updated successfully', type: UserEntity })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @Put('edit')
+  @ResponseMessage('User updated successfully')
   async updateUser(
     @Req() req: ReqWithUser,
     @Body() updateUserData: UpdateUserDto,
@@ -70,6 +76,7 @@ export class UsersController {
   @ApiOkResponse({ description: 'User with Post found', type: UserEntity })
   @ApiResponse({ status: 404, description: 'User with posts not found' })
   @Get('posts')
+  @ResponseMessage('User with Post data fetched successfully')
   async getUserPosts(@Req() req: ReqWithUser): Promise<UserEntity | null> {
     if (!req.user) {
       throw new UnauthorizedException('User not authenticated');
@@ -93,6 +100,7 @@ export class UsersController {
   })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @Delete('delete')
+  @ResponseMessage('User deleted successfully')
   async deleteUser(@Req() req: ReqWithUser): Promise<object> {
     return await this.userService.deleteUser(req.user.id);
   }

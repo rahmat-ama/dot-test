@@ -9,6 +9,7 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthSignUpDto, AuthSignInDto } from './dto';
 import { UserEntity } from 'src/users/entities/user.entity';
+import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -20,6 +21,7 @@ export class AuthController {
   @ApiCreatedResponse({ description: 'Register successful', type: UserEntity })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @Post('signup')
+  @ResponseMessage('Register success, new User created successfully')
   @HttpCode(HttpStatus.CREATED)
   async signUp(@Body() signUpData: AuthSignUpDto): Promise<object> {
     return await this.authService.signUp(signUpData);
@@ -30,6 +32,7 @@ export class AuthController {
   @ApiOkResponse({ description: 'Login successful', type: UserEntity })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @Post('signin')
+  @ResponseMessage('Login success')
   @HttpCode(HttpStatus.OK)
   async signIn(@Body() signInData: AuthSignInDto): Promise<object> {
     return await this.authService.signIn(signInData);
