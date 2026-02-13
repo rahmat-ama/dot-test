@@ -40,12 +40,9 @@ export class PostsService {
     return post;
   }
 
-  async deletePost(id: number): Promise<object> {
-    await this.postRepo.delete(id);
+  async deletePost(id: number): Promise<PostEntity> {
+    const deletedPost = await this.postRepo.delete(id);
 
-    return {
-      status: true,
-      message: 'Post deleted successfully',
-    };
+    return deletedPost;
   }
 }
